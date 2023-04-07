@@ -1,0 +1,536 @@
+{
+	"info": {
+		"_postman_id": "d18a47dd-5339-4956-accf-a9842d4fba33",
+		"name": "Trello API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26568323"
+	},
+	"item": [
+		{
+			"name": "Get all boards",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/members/{{myID}}/boards?key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"members",
+						"{{myID}}",
+						"boards"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a single board",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id?key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ab4108676926e17227b02"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get deleted board",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id?key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ad5fdedb657100f9458cf"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a board",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"pm.test(\"Board should be created\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"boardName\"));\r",
+							"    pm.expect(jsonData.closed).to.eql(false)\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Board should be private\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.prefs.permissionLevel).to.eql(\"private\");\r",
+							"});\r",
+							"\r",
+							"pm.globals.set(\"boardId\", response.id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.collectionVariables.set(\"boardName\", getRandomBoardName());\r",
+							"\r",
+							"function getRandomBoardName() {\r",
+							"    const boardName = \"My board name \" + parseInt(Math.random() * 10000);\r",
+							"    return boardName\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/?name={{boardName}}&key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						""
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "{{boardName}}"
+						},
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create TODO list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"List should be created\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.name).to.eql(\"TODO\");\r",
+							"    pm.expect(jsonData.closed).to.eql(false);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"List was created inside the board\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.idBoard).to.eql(pm.globals.get(\"boardId\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/lists?key={{myKey}}&token={{myToken}}&name=TODO",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						"lists"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						},
+						{
+							"key": "name",
+							"value": "TODO"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create DONE list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/lists?key={{myKey}}&token={{myToken}}&name=DONE",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						"lists"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						},
+						{
+							"key": "name",
+							"value": "DONE"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ab4108676926e17227b02"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get lists of a board",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.trello.com/1/boards/:id/lists?key={{myKey}}&token={{myToken}}",
+					"protocol": "https",
+					"host": [
+						"api",
+						"trello",
+						"com"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						"lists"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ab4108676926e17227b02"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a list of a board",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/lists/:id/?key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"lists",
+						":id",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ac901b86cc46bbf3fa02d"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a card",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/cards?name=Sign-up for Trello&key={{myKey}}&token={{myToken}}&idList=642ac901b86cc46bbf3fa02d",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"cards"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Sign-up for Trello"
+						},
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						},
+						{
+							"key": "idList",
+							"value": "642ac901b86cc46bbf3fa02d"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Move all cards to another list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/lists/:id/moveAllCards?idBoard=642ab4108676926e17227b02&idList=642acbf8683cd3549a7270ec&key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"lists",
+						":id",
+						"moveAllCards"
+					],
+					"query": [
+						{
+							"key": "idBoard",
+							"value": "642ab4108676926e17227b02"
+						},
+						{
+							"key": "idList",
+							"value": "642acbf8683cd3549a7270ec"
+						},
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642ac901b86cc46bbf3fa02d"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a board",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id?key={{myKey}}&token={{myToken}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{myKey}}"
+						},
+						{
+							"key": "token",
+							"value": "{{myToken}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "642c3737298b4faf65ecd813"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "myKey",
+			"value": "db495030046dd91962a1c11d2af99c23",
+			"type": "string"
+		},
+		{
+			"key": "myToken",
+			"value": "ATTA234ab9adf7ffbc788547aa117f4b39de2093b74acf92f1271066a09c7f3bc213283659C0",
+			"type": "string"
+		},
+		{
+			"key": "myID",
+			"value": "juliakuzniecow",
+			"type": "string"
+		},
+		{
+			"key": "baseURL",
+			"value": "https://api.trello.com",
+			"type": "string"
+		},
+		{
+			"key": "boardName",
+			"value": ""
+		}
+	]
+}
